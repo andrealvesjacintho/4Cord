@@ -693,6 +693,7 @@ class LoginWindow(Gtk.Window):
         self._install_css()
         self._build()
         self.show_all()
+        self.present()
         GLib.idle_add(self.auto_import)
 
     def _install_css(self):

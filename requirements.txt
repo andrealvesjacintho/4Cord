@@ -1,0 +1,16 @@
+# 4Cord 2.4.0 — dependências Python
+#
+# O aplicativo não usa pacotes PyPI. Toda a lógica usa a biblioteca padrão do
+# Python 3 e o PyGObject (gi), que é nativo e deve vir do repositório da
+# distribuição:
+#
+#   Ubuntu: python3-gi, gir1.2-gtk-3.0, gir1.2-webkit2-4.1,
+#           gir1.2-gdkpixbuf-2.0
+#   Arch:   python-gobject, gtk3, webkit2gtk-4.1, gdk-pixbuf2
+#
+# O install.sh valida esses módulos e cria um ambiente virtual com acesso aos
+# pacotes do sistema. Não instale PyGObject via pip: isso exigiria compilador e
+# cabeçalhos nativos e poderia duplicar bibliotecas do sistema.
+#
+# `pip install -r requirements.txt` é intencionalmente uma operação sem
+# pacotes para manter a instalação reproduzível e offline.

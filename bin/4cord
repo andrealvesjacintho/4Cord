@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# 4Cord - cliente leve (Python + GTK/WebKitGTK, API oficial)
+# Uso: 4cord [--mock] [--selftest]
+set -uo pipefail
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# O instalador cria .venv com acesso aos módulos do sistema (PyGObject).
+# Sem ele, usa o Python do sistema, preservando o lançador original.
+if [ -x "$DIR/.venv/bin/python" ]; then
+    exec "$DIR/.venv/bin/python" "$DIR/app.py" "$@"
+fi
+exec python3 "$DIR/app.py" "$@"

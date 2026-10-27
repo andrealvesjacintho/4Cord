@@ -1,0 +1,229 @@
+RELATÓRIO DE AUDITORIA — 4Cord 2.4.0
+Data: 25/10/2026
+Escopo: estabilidade e comportamento real de A1, A2, A3, A4, A7 e A10,
+indicador de RAM, indicadores de carregamento e persistência do acento.
+
+Nota: este relatório registra a auditoria de 25/10/2026. A etapa posterior de
+instalador compartilhado, recuperação de DMs, central de informações e
+versionamento está documentada no README, no CHECKLIST e nos testes finais.
+
+RESUMO EXECUTIVO
+----------------
+A auditoria encontrou problemas reais de concorrência, sincronização,
+segurança de persistência e retenção de mídia. Todos os problemas concretos
+identificados no escopo foram corrigidos com mudanças pontuais. Não foram
+adicionadas funcionalidades nem feitas refatorações amplas.
+
+A suíte existente continua passando. Foram acrescentados testes focados nos
+cenários que falharam. A validação foi feita em modo mock/local; o CDN real do
+Discord e uma conta real não puderam ser exercitados neste ambiente.
+
+PROBLEMAS ENCONTRADOS E CORREÇÕES
+--------------------------------
+1. CRÍTICO — Buraco no histórico após reconexão longa
+   Problema: com uma janela de 300 mensagens e mais de uma página perdida, a
+   sincronização buscava apenas 50 mensagens. Se não houvesse sobreposição com
+   a janela exibida, as mensagens novas eram anexadas ao fim, deixando um
+   intervalo inacessível no meio da lista.
+   Correção: a reconexão passou a buscar até 100 mensagens (SYNC_LIMIT=100) e
+   a comparar o ID mais antigo recebido com o mais novo da janela. Sem
+   sobreposição: se o usuário está no fim, a janela é substituída pela página
+   mais recente; se está lendo o passado, a janela é preservada e o botão
+   "voltar ao recente" é sinalizado (hasNewer).
+   Justificativa: elimina o buraco sem aumentar o limite de 300 mensagens nem
+   o tamanho de página de 50.
+
+2. CRÍTICO — Backend ignorava o limite pedido pela UI
+   Problema: o comando "messages" chamava a API sem repassar "limit". A busca
+   de 100 mensagens na reconexão continuava retornando 50, tornando a detecção
+   de sobreposição ineficaz.
+   Correção: o limite agora é convertido para inteiro, limitado a 1..100 e
+   repassado à API.
+   Justificativa: sem isso, a correção do item 1 não teria efeito real.
+
+3. ALTO — Corrida ao salvar configurações em threads simultâneas
+   Problema reproduzido: comandos da UI chegam em threads separadas (uma por
+   mensagem da ponte). Gravar o mesmo dicionário enquanto ele era alterado
+   podia gerar "RuntimeError: dictionary changed size during iteration", além
+   de perder atualizações.
+   Correção: serialização por _SETTINGS_LOCK, snapshot com retentativa antes
+   da serialização e nova função update_settings() para aplicar mudanças e
+   gravar sob o mesmo lock. A gravação continua atômica via arquivo temporário
+   e os._replace, agora com permissão 600.
+   Justificativa: settings.json precisa ser sempre JSON válido e não pode
+   perder nome, tema, acento ou opção de log.
+
+4. ALTO — Migração podia restaurar token apagado no logout
+   Problema: a migração copiava o token antigo a cada inicialização se o
+   token novo não existisse. Depois de um logout, o token removido podia
+   voltar na próxima abertura.
+   Correção: migração única com marcador
+   ~/.config/4cord/.migrated-from-trashpanda. A cópia só ocorre se a
+   configuração nova ainda não existe; a configuração antiga nunca é apagada
+   nem alterada.
+   Justificativa: corrige um problema de segurança e privacidade sem impedir a
+   migração inicial.
+
+5. MÉDIO — Mensagem ao vivo podia ser perdida na carga inicial do canal
+   Problema reproduzido: uma mensagem recebida enquanto openChannel() aguardava
+   a página inicial podia ser descartada quando a janela era substituída.
+   Correção: S.loadingChannel enfileira mensagens durante a carga; ao final,
+   a fila é aplicada. Mensagens que já vieram na página são ignoradas para não
+   duplicar.
+   Justificativa: evita perda silenciosa de eventos sem alterar a ordem
+   cronológica.
+
+6. MÉDIO — Operações de histórico podiam se misturar
+   Problema: carregar anteriores, voltar ao recente e sincronizar reconexão
+   podiam disparar chamadas concorrentes e misturar páginas.
+   Correção: guardas cruzados entre loadOlder, goLatest e syncLatest.
+   Justificativa: mantém a janela coerente e evita respostas atrasadas
+   sobrescrevendo o estado atual.
+
+7. MÉDIO — Retenção de mídia por URL mantinha duplicatas decodificadas
+   Problema: duas mídias com a mesma URL permaneciam retidas se uma delas
+   estivesse aberta no visualizador, porque a verificação comparava apenas a
+   URL.
+   Correção: o visualizador passou a rastrear o nó exato aberto (lbWrap e
+   lbHasWrap). Ao fechar ou descartar o nó, a referência é limpa.
+   Justificativa: reduz memória sem quebrar a regra de não descarregar a mídia
+   que está sendo visualizada.
+
+8. MÉDIO — Permissões de arquivos sensíveis
+   Problema: o token era criado com a permissão padrão e só depois recebia
+   chmod 600; log e log rotacionado podiam ficar legíveis por outros usuários.
+   Correção: token e settings.json criados via mkstemp com 600; log aberto com
+   600 e log rotacionado recebe chmod 600.
+   Justificativa: fecha a janela em que credenciais ou detalhes internos
+   poderiam ser lidos por outros usuários.
+
+9. BAIXO — Spinner preso ao trocar de canal/guild sem mensagens
+   Problema: resetHistory não desligava o indicador de carregamento.
+   Correção: resetHistory chama setMsgLoading(false).
+   Justificativa: evita indicador eterno em canal vazio ou erro de navegação.
+
+10. BAIXO — "Carregar anteriores" não sinalizava histórico mais novo
+    Problema: ao entrar no modo de leitura antiga, o botão "voltar ao recente"
+    podia não aparecer.
+    Correção: loadOlder define hasNewer quando há mensagens anteriores
+    carregadas.
+    Justificativa: mantém a navegação previsível.
+
+11. BAIXO — Atalho do desktop e callbacks de tema/nome podiam usar valor antigo
+    Problema: nome e ícone podiam ser gravados em threads diferentes com
+    arquivo temporário fixo; callbacks de tema/nome podiam aplicar um valor
+    anterior ao mais recente persistido.
+    Correção: _DESKTOP_LOCK, temporário único por escrita e aplicação do valor
+    atual de settings nos callbacks.
+    Justificativa: evita arquivo .desktop corrompido e inconsistência visual.
+
+TESTES E RESULTADOS
+-------------------
+Compilação e sintaxe:
+- python3 -m py_compile app.py core/*.py tests/*.py: OK.
+- node --check ui/app.js: OK.
+- python3 app.py --mock --selftest: 5 mensagens, 3 reações, 2 componentes,
+  sem erro JS; título "4Cord".
+
+Suíte existente reexecutada com sucesso:
+- features, rename, emotes, censor, links, cap, history, media,
+  media_fallback, seen, sync, nav_guard, probe e --mock --selftest.
+
+Testes de auditoria:
+- tests/audit_ui.py
+  gapLive: 100 mensagens, primeira 1351, última 1450, zero buracos,
+  hasOlder=true, hasNewer=false, DOM=100.
+  overlap: 300 mensagens, 1050..1349, zero buracos, sem duplicatas.
+  gapReading: janela 1000..1299 preservada, hasNewer=true.
+  guardas: syncBlocked=0, olderBlocked=0, latestBlocked=0.
+  spinner: hidden=true após reset.
+  mídia com URL duplicada: nó aberto retido=true, outro=false; ao fechar,
+  ambos=false; abertura apenas por URL mantém o comportamento por URL;
+  dispose limpa a referência.
+
+- tests/audit_initial_load.py
+  Mensagem ao vivo durante a carga: fila=1, janela final 1000..2000,
+  mensagem ao vivo no fim, sem duplicata, pending=0.
+  Mensagem ao vivo já presente na página: count2000=1.
+
+- tests/audit_sync_e2e.py
+  Backend recebeu limit=100; janela final 1351..1450, zero buracos.
+
+- tests/audit_settings.py
+  Migração: token copiado, nome normalizado para 4Cord, tema preservado,
+  arquivos antigos intactos, marcador criado.
+  Após logout: token ausente.
+  Permissões: token=600, settings=600, log=600.
+  Concorrência: 8 threads x 120 atualizações = 961 chaves na memória e no
+  disco, zero erros, JSON válido.
+  Dicionário mutado externamente: zero erros de serialização.
+
+- tests/audit_ram.py
+  202,3 MB em 9 processos, igual à soma manual de PSS; método PSS;
+  processo filho incluído na contagem e removido após encerramento.
+
+- Log:
+  padrão: arquivo ausente/0 bytes.
+  detalhado: 1303 bytes, 25 linhas, cmd=send presente, permissão 600.
+  Redação: token e formato mfa foram redigidos; marcador [token] presente.
+  Rotação: arquivo rotacionado e novo arquivo com permissão 600.
+
+- Persistência visual:
+  acento #33aa55 e tema amoled sobreviveram ao reinício; settings.json=600.
+  Tema aplicado seguiu o valor mais recente mesmo com pedidos fora de ordem.
+
+- A/B final (1500 mensagens):
+  DOM=300, mensagens=300, cache de IDs=1000, injeção=3,758 s,
+  delta de CPU=4,23 s, PSS=233,9 MB, scrollHeight=6352.
+  Faixas documentadas em 5 execuções: PSS 222,1–233,9 MB;
+  CPU 4,02–4,23 s.
+
+- Mídia A/B:
+  31 capas, 0 reveladas, 0 com src após sair da tela; miniatura inline com
+  width/height e visualizador com URL original.
+  Observação: isso foi medido em mock; não prova o comportamento do CDN real.
+
+LIMITES DE VALIDAÇÃO MANUAL
+---------------------------
+- O CDN real do Discord não foi exercitado. O redimensionamento por
+  width/height, o fallback para a imagem original e o descarregamento real de
+  mídia precisam ser confirmados em uma conta real.
+- Uma conta real não foi usada. Histórico, reconexão após queda de rede,
+  rate limits, permissões de canal, muitos canais e muitas mídias ainda
+  precisam de teste manual.
+- A comparação de RAM com o cliente original em conta real não foi feita.
+  Os valores de PSS são desta máquina e variam com WebKit, tema e cache.
+- O menu de aplicativos do desktop não foi aberto para confirmar a atualização
+  visual do atalho; apenas o arquivo .desktop foi validado.
+- Logout/relogin com token real não foi testado; a lógica foi validada em
+  ambiente isolado.
+- Na data desta auditoria o projeto ainda não tinha repositório Git; a versão
+  final foi versionada localmente e o remoto continua pendente.
+
+ARQUIVOS ALTERADOS
+------------------
+- app.py
+- core/log.py
+- ui/app.js
+- README.md
+- CHECKLIST.md
+- tests/README.md
+- tests/audit_ui.py
+- tests/audit_initial_load.py
+- tests/audit_sync_e2e.py
+- tests/audit_ram.py
+- tests/audit_settings.py
+- RELATORIO-AUDITORIA-4CORD.txt (este relatório)
+
+RECOMENDAÇÃO
+------------
+O 4Cord 2.4.0 está apto para uso diário no escopo validado em mock/local:
+os problemas concretos de sincronização, concorrência, migração, permissões,
+carregamento inicial, navegação de histórico e retenção de mídia foram
+corrigidos e cobertos por testes.
+
+Antes de declarar validação completa em produção, recomenda-se um teste manual
+com conta real cobrindo: reconexão após suspensão/queda, histórico longo,
+miniaturas do CDN, logout/relogin e comparação de RAM com uso real. Não foi
+encontrado bloqueador conhecido no código auditado, mas essas verificações
+externas continuam pendentes.

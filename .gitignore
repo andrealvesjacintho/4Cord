@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+.venv.bak-*/
+.venv.new.*
+
+# Configuração local, credenciais e logs (nunca versionar)
+.env
+.env.*
+token
+settings.json
+log.txt
+*.log
+instance.lock
+
+# Resultados locais de testes e builds
+dist/
+build/
+*.egg-info/
+*_result.json

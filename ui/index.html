@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4Cord</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div id="app">
+  <div id="sideScrim"></div>
+  <aside id="side">
+    <header id="sideHead">
+      <button class="icon" id="sideToggle" title="Recolher canais (Ctrl+B)" aria-label="Recolher canais">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 7h16M4 12h16M4 17h16"/>
+        </svg>
+      </button>
+      <span id="sideTitle">NOTES</span>
+      <button class="icon hidden" id="addDMBtn" title="Adicionar DM" aria-label="Adicionar DM">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+      </button>
+      <button class="icon" id="dmBtn" title="Mensagens diretas" aria-label="Mensagens diretas">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <path d="M4 6h16v11H9l-4 3z"/><path d="M8 10h8M8 13h5"/>
+        </svg>
+      </button>
+    </header>
+    <div id="sideBody" class="scroll"></div>
+    <div id="ramInfo" class="ramInfo" title="Uso de memória do 4Cord (PSS agregado)">RAM —</div>
+    <footer id="sideFoot">
+      <img id="meAvatar" class="avatar s24" alt="">
+      <div class="meInfo"><b id="meName">—</b><small id="meTag">—</small></div>
+      <button class="icon" id="settingsBtn" title="Ajustes">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.3 1a7 7 0 0 0-1.7-1L14.6 3h-4l-.4 2.5a7 7 0 0 0-1.7 1l-2.3-1-2 3.4L6 10.4a7 7 0 0 0 0 2l-2 1.6 2 3.4 2.3-1a7 7 0 0 0 1.7 1l.4 2.6h4l.4-2.6a7 7 0 0 0 1.7-1l2.3 1 2-3.4-2-1.6c.1-.3.1-.7.1-1z"/>
+        </svg>
+      </button>
+    </footer>
+  </aside>
+
+  <div class="resizer" id="r2"></div>
+
+  <main id="chat">
+    <header id="chatHead">
+      <button class="icon" id="sideOpen" title="Canais" aria-label="Abrir canais">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 7h16M4 12h16M4 17h16"/>
+        </svg>
+      </button>
+      <div class="chName"><span id="chHash">#</span><b id="chTitle">—</b><span id="conn" class="conn" title="conexão em tempo real"></span><span id="syncSpin" class="spinner hidden" title="sincronizando mensagens..."></span></div>
+      <div class="chTools">
+        <button class="icon" id="reloadBtn" title="Recarregar mensagens" aria-label="Recarregar mensagens">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 11a8 8 0 1 0-2.3 6.7"/><path d="M20 4v7h-7"/>
+          </svg>
+        </button>
+        <button class="icon" id="themeBtn" title="Tema" aria-label="Alternar tema">◐</button>
+        <button class="icon help" id="helpBtn" title="Sobre o 4Cord" aria-label="Sobre o 4Cord">?</button>
+      </div>
+    </header>
+    <div id="msgs" class="scroll">
+      <div id="msgLoading" class="loadingRow hidden"><span class="spinner"></span><span>carregando mensagens...</span></div>
+      <div id="loadOlderWrap">
+        <button id="loadOlder" class="loadBtn"><span id="loadOlderSpin" class="spinner hidden"></span><span>carregar anteriores</span></button>
+        <button id="loadNewer" class="loadBtn hidden">voltar ao recente</button>
+      </div>
+      <div id="msgList"></div>
+    </div>
+    <div id="typing"></div>
+    <footer id="composer">
+      <button class="icon" id="attachBtn" title="Anexar">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <path d="M20 12l-8 8a5 5 0 0 1-7-7l9-9a3.5 3.5 0 0 1 5 5l-9 9a2 2 0 0 1-3-3l8-8"/>
+        </svg>
+      </button>
+      <textarea id="input" rows="1" spellcheck="false" autocorrect="off" autocapitalize="off" placeholder="Mensagem em #—"></textarea>
+      <button class="send" id="sendBtn" type="button" title="Enviar mensagem" aria-label="Enviar mensagem">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/>
+        </svg>
+      </button>
+    </footer>
+  </main>
+</div>
+
+<div id="lightbox">
+  <div id="lbBar">
+    <button id="lbMinus">−</button><button id="lbPlus">+</button>
+    <button id="lbReset">1:1</button><button id="lbOpen">Abrir</button>
+    <button id="lbClose">X</button>
+  </div>
+  <img id="lbImg" alt="">
+  <div id="lbError" class="hidden">Não foi possível abrir esta mídia.</div>
+</div>
+
+<div id="friends" class="popover hidden">
+  <div class="friendsHead"><b>Adicionar DM</b><button id="friendsClose" class="mini">x</button></div>
+  <input id="friendSearch" class="searchInput" type="text" spellcheck="false" autocorrect="off" placeholder="Filtrar amigos">
+  <div id="friendList" class="friendList"></div>
+</div>
+
+<div id="settings" class="popover hidden">
+  <h3><span id="appTitle">4Cord</span> <small id="ver"></small></h3>
+  <label>Servidor exibido
+    <select id="serverSel"></select>
+  </label>
+  <label>Nome do aplicativo
+    <span class="inlineField">
+      <input id="appNameInput" type="text" maxlength="40" spellcheck="false" placeholder="4Cord">
+      <button id="appNameSave" class="mini">ok</button>
+    </span>
+  </label>
+  <label class="row"><span>Ícone do aplicativo</span>
+    <span class="iconPick">
+      <img id="iconPreview" class="iconPreview hidden" alt="">
+      <button id="iconBtn" class="mini">escolher</button>
+    </span>
+  </label>
+  <label>Tema
+    <select id="themeSel">
+      <option value="dark">Escuro</option>
+      <option value="amoled">AMOLED</option>
+      <option value="auto">Automático</option>
+    </select>
+  </label>
+  <label class="row"><span>Cor de destaque</span>
+    <span class="accentPick">
+      <input type="color" id="accentPick" value="#5b6cff" title="Escolher cor de destaque">
+      <button id="accentReset" class="mini" title="Voltar ao azul padrão">padrão</button>
+    </span>
+  </label>
+  <label class="row"><span>Avatar no rodapé</span><input type="checkbox" id="avatarsChk"></label>
+  <label class="row"><span>Log detalhado</span><input type="checkbox" id="verboseChk" title="Registra também comandos e eventos rotineiros"></label>
+  <label class="row"><span>Redefinir largura da lista</span><button id="resetWidths" class="mini">ok</button></label>
+  <label class="row"><span>Sair da conta</span><button id="logoutBtn" class="mini danger">sair</button></label>
+  <div class="hint" id="mockHint"></div>
+</div>
+
+<div id="info" class="infoOverlay hidden" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+  <div class="infoPanel">
+    <header class="infoHead">
+      <div class="infoBrand">
+        <span class="infoBadge" aria-hidden="true">4</span>
+        <div><b id="infoTitle">Central de informações</b><small>4Cord <span id="infoVersion">v2.4.0</span></small></div>
+      </div>
+      <button class="icon" id="infoClose" title="Fechar" aria-label="Fechar central de informações">✕</button>
+    </header>
+
+    <nav class="infoTabs" id="infoTabs" role="tablist" aria-label="Seções da central de informações">
+      <button class="infoTab active" id="infoTabAbout" role="tab" aria-selected="true" aria-controls="infoAbout" data-info-tab="about">Sobre</button>
+      <button class="infoTab" id="infoTabSteps" role="tab" aria-selected="false" aria-controls="infoSteps" data-info-tab="steps">Etapas</button>
+      <button class="infoTab" id="infoTabTech" role="tab" aria-selected="false" aria-controls="infoTech" data-info-tab="tech">Tecnologias</button>
+    </nav>
+
+    <div class="infoBody" id="infoBody">
+      <section id="infoAbout" class="infoSection" role="tabpanel" aria-labelledby="infoTabAbout">
+        <p class="infoLead">O <b>4Cord</b> é um cliente de conversa leve para Linux, feito para ler canais de texto e mensagens diretas com uma interface compacta e própria. Ele conversa diretamente com a API e o gateway do Discord; o aplicativo web do Discord não é carregado.</p>
+
+        <div class="creatorCard">
+          <span class="creatorLabel">Criador</span>
+          <strong class="creatorName" id="creatorName">Guaxi Rascal</strong>
+          <span class="creatorNote">idealizador e desenvolvedor do projeto 4Cord</span>
+        </div>
+
+        <div class="infoNote">
+          O 4Cord é uma recriação leve <b>inspirada</b> em aplicativos de comunicação. Ele <b>não é uma implementação oficial do Discord</b> e não tem vínculo, patrocínio ou aprovação da Discord Inc.
+        </div>
+
+        <h4>Pontos positivos</h4>
+        <ul class="infoList good">
+          <li>Interface compacta: mensagens em poucas linhas, sem fotos de perfil nas mensagens.</li>
+          <li>Histórico limitado a 300 mensagens por conversa no DOM e na memória, com paginação de 50 em 50.</li>
+          <li>Mídia só é baixada depois do clique e é liberada quando sai da tela; emotes externos não são carregados.</li>
+          <li>Lista de servidores simplificada, com preferência pelo servidor <b>NOTES</b> quando ele existe.</li>
+          <li>Recursos úteis no dia a dia: DMs, canais de texto, reações, componentes interativos, anexos, temas e cor de destaque.</li>
+          <li>Interface feita com HTML, CSS e JavaScript próprios, usando o GTK e o WebKitGTK já presentes no sistema — sem framework JavaScript externo.</li>
+          <li>Indicador de RAM do processo e um log de diagnóstico que não registra o conteúdo das mensagens.</li>
+        </ul>
+
+        <h4>Limitações e pontos negativos</h4>
+        <ul class="infoList bad">
+          <li>Não oferece voz, vídeo, compartilhamento de tela, threads, busca, notificações do sistema, enquetes, gerenciamento de servidores ou moderação.</li>
+          <li>O Markdown é simplificado e embeds, perfis completos e emotes personalizados não são exibidos como no cliente oficial; emotes externos aparecem como <b>?</b>.</li>
+          <li>O login é feito por token de conta, não por OAuth. O token vale como uma senha e fica gravado localmente sem criptografia (com permissão restrita).</li>
+          <li>Depende da API, do gateway e do CDN do Discord, além de conexão com a internet. Mudanças no serviço podem quebrar o aplicativo.</li>
+          <li>É um aplicativo para Linux; não há versões para Windows, macOS ou celular.</li>
+          <li>A janela mantém até 300 mensagens por conversa. Mensagens antigas ficam no servidor e são carregadas sob demanda; não há modo offline.</li>
+          <li>Após uma reconexão, o 4Cord tenta recuperar as mensagens disponíveis na API, mas o Discord pode não conservar ou entregar eventos que ficaram fora do alcance da sessão.</li>
+          <li>Os testes automatizados usam dados simulados; o CDN real, uma conta real e o Arch Linux com Xfce4 ainda dependem de validação manual neste ambiente.</li>
+        </ul>
+      </section>
+
+      <section id="infoSteps" class="infoSection hidden" role="tabpanel" aria-labelledby="infoTabSteps">
+        <p class="infoLead">Resumo das principais etapas verificáveis do projeto, sem datas inventadas. A ordem abaixo segue a evolução descrita na documentação e no código.</p>
+        <ol class="infoSteps">
+          <li><b>Origem como TrashPanda.</b> O aplicativo começou com outro nome e uma configuração local própria.</li>
+          <li><b>Identidade 4Cord.</b> Nome, ícone, atalho e configuração passaram a usar 4Cord. A migração do diretório antigo é feita uma única vez e preserva os arquivos originais.</li>
+          <li><b>Interface própria e compacta.</b> A UI deixou de depender do aplicativo web do Discord e adotou mensagens compactas, sem avatares nas mensagens, com temas escuro, AMOLED e automático, além de cor de destaque configurável.</li>
+          <li><b>Simplificação da navegação.</b> A lista de servidores foi reduzida ao seletor necessário, com preferência pelo servidor NOTES quando presente, e as DMs ganharam uma lista dedicada.</li>
+          <li><b>Auditoria de desempenho.</b> Foram implementados o limite de 300 mensagens, o cache de 1000 IDs vistos, miniaturas sob demanda, liberação de mídia fora da tela, log crítico por padrão e desativação explícita do corretor.</li>
+          <li><b>Versão 2.4.0 para distribuição.</b> Foram adicionados instalador compartilhado, launcher, requisitos documentados e instruções para Ubuntu e Arch Linux.</li>
+          <li><b>Recuperação de DMs e central de informações.</b> A reconexão passou a sincronizar a conversa atual e a recuperar mensagens perdidas quando a API permite; o botão de ajuda reúne a documentação do projeto.</li>
+        </ol>
+      </section>
+
+      <section id="infoTech" class="infoSection hidden" role="tabpanel" aria-labelledby="infoTabTech">
+        <p class="infoLead">Resumo das tecnologias usadas para construir e executar o 4Cord. Os detalhes de arquitetura ficam em <b>Detalhes avançados</b>.</p>
+        <div class="techGrid">
+          <div class="techCard"><b>Interface</b><span>HTML, CSS e JavaScript próprios, renderizados pelo WebKitGTK.</span></div>
+          <div class="techCard"><b>Janela e sistema</b><span>Python 3 com PyGObject, GTK 3 e GdkPixbuf.</span></div>
+          <div class="techCard"><b>Comunicação</b><span>API REST v9 e gateway WebSocket v10 do Discord.</span></div>
+          <div class="techCard"><b>Dependências Python</b><span>Somente bibliotecas padrão e o PyGObject fornecido pela distribuição; não há pacotes PyPI obrigatórios.</span></div>
+          <div class="techCard"><b>Armazenamento</b><span>Configuração local em JSON e token em arquivo com permissão restrita.</span></div>
+          <div class="techCard"><b>Plataforma</b><span>Linux com GTK 3 e WebKitGTK 4.1; GNOME não é obrigatório.</span></div>
+        </div>
+        <p class="infoHint">O 4Cord não carrega o cliente web do Discord, não inclui telemetria própria e não usa bibliotecas JavaScript externas.</p>
+      </section>
+
+      <section id="infoAdvanced" class="infoSection hidden" role="tabpanel" aria-label="Detalhes avançados">
+        <h4>Arquitetura</h4>
+        <p>Um único código-fonte atende Ubuntu e Arch Linux. A interface é uma página local carregada no WebKitGTK; ela conversa com o Python por uma ponte de mensagens JSON. O Python concentra a janela GTK, as configurações, os comandos e a comunicação com o Discord.</p>
+        <ul class="infoList">
+          <li><b>app.py</b>: janela GTK, identidade, login nativo, configurações, atalho .desktop, indicador de RAM, ponte JavaScript-Python e comandos.</li>
+          <li><b>core/discord.py</b>: cliente REST v9, gateway, upload multipart, reações, interações e reconexão.</li>
+          <li><b>core/ws.py</b>: WebSocket RFC 6455 mínimo, escrito apenas com a biblioteca padrão, com suporte a frames, ping/pong e fechamento.</li>
+          <li><b>core/log.py</b>: log crítico por padrão, modo detalhado opcional, rotação e redação de credenciais.</li>
+          <li><b>ui/</b>: HTML, CSS e JavaScript da interface; sem bundler e sem dependências de frontend.</li>
+        </ul>
+
+        <h4>Comunicação e sincronização</h4>
+        <ul class="infoList">
+          <li>REST em <b>/api/v9</b> para usuário, servidores, canais, DMs, mensagens, reações, interações e envio de arquivos.</li>
+          <li>Gateway WebSocket v10 com IDENTIFY, RESUME, heartbeat, backoff e códigos de fechamento fatais.</li>
+          <li>Cada reconexão usa uma nova conexão WebSocket e um novo Event de heartbeat; conexões e listeners antigos são encerrados para não duplicar eventos.</li>
+          <li>Na reconexão, a conversa atual busca até 100 mensagens recentes para detectar sobreposição e evitar buracos. IDs já vistos são deduplicados.</li>
+          <li>DMs conhecidas são atualizadas com <code>GET /channels/{id}/messages?after=...</code> quando a API informa mensagens novas; a recuperação é limitada a uma página por reconexão e não cria uma segunda conexão de eventos.</li>
+          <li>O botão de recarregar no cabeçalho força a sincronização da conversa atual, seja canal de servidor ou DM, e atualiza a lista de DMs.</li>
+          <li>A janela mantém no máximo 300 mensagens, páginas de 50 e cache de 1000 IDs. Mensagens perdidas durante uma desconexão só podem ser recuperadas se o Discord ainda as disponibilizar.</li>
+        </ul>
+
+        <h4>Configuração, dados e segurança</h4>
+        <ul class="infoList">
+          <li>Configuração em <code>~/.config/4cord/settings.json</code>; token em <code>~/.config/4cord/token</code>; log em <code>~/.config/4cord/log.txt</code>.</li>
+          <li>Token, configurações e log são criados com permissão <code>600</code>. O log rotacionado também recebe essa permissão.</li>
+          <li>O token não é gravado no código, no README nem no log. Ainda assim, ele fica em texto simples no disco: quem tiver acesso à conta do usuário pode lê-lo.</li>
+          <li>O importador opcional procura uma sessão do Discord nos armazenamentos locais de navegadores conhecidos. Ele não envia esses dados para outro lugar além da API do Discord.</li>
+          <li>A migração de <code>~/.config/trashpanda</code> é única, não apaga o diretório antigo e não restaura um token removido no logout.</li>
+          <li>O armazenamento <code>localStorage</code> guarda apenas cache visual (tema, acento, largura e preferências), não credenciais.</li>
+        </ul>
+
+        <h4>Desempenho</h4>
+        <ul class="infoList">
+          <li>Limite de 300 mensagens no DOM e na memória; cache de 1000 IDs vistos; páginas de 50; sincronização de reconexão de até 100.</li>
+          <li>Miniaturas de anexos do CDN do Discord sob demanda, com fallback para a URL original; visualizador sempre usa a imagem original.</li>
+          <li>Um único <code>IntersectionObserver</code> libera a mídia revelada que sai da tela, mantendo apenas o nó aberto no visualizador.</li>
+          <li>Log detalhado desligado por padrão; RAM lida de <code>/proc</code> com PSS agregado dos processos do 4Cord e fallback para RSS.</li>
+          <li>Recursos do WebKit sem WebGL, WebAudio, aceleração de hardware ou corretor ortográfico, reduzindo dependências e consumo.</li>
+        </ul>
+
+        <h4>Compatibilidade</h4>
+        <ul class="infoList">
+          <li>Testado nesta etapa no Ubuntu 26.04 com GNOME. O Arch Linux com Xfce4 possui instruções e pacotes documentados, mas a validação depende de um ambiente Arch disponível.</li>
+          <li>Não há dependência obrigatória de GNOME: em outros ambientes o tema é lido do GTK; o gsettings do GNOME é usado apenas em sessões GNOME, Unity ou Ubuntu com GNOME.</li>
+          <li>O indicador de RAM usa <code>/proc</code>, portanto o aplicativo é específico para Linux.</li>
+          <li>O atalho <code>4cord.desktop</code> usa <code>StartupWMClass=4cord</code> e funciona em GNOME e Xfce4; o lançador respeita um ambiente virtual local quando ele existe.</li>
+          <li>Os testes automatizados usam o modo <code>--mock</code>; isso não substitui uma conta real, o CDN real ou uma instalação limpa de Arch Linux.</li>
+        </ul>
+      </section>
+    </div>
+
+    <footer class="infoFoot">
+      <button id="infoAdvancedBtn" class="infoMore">Detalhes avançados →</button>
+      <button id="infoBack" class="mini hidden">← Voltar</button>
+      <span class="infoHint">Esc fecha · use Tab para navegar</span>
+    </footer>
+  </div>
+</div>
+
+<div id="toast" class="hidden"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

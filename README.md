@@ -80,7 +80,8 @@ O 4Cord também pode ser aberto pelo menu de aplicativos do GNOME ou Xfce4.
 ## Login e segurança
 
 - O login usa um token de conta, não senha ou OAuth. O token fica em
-  `~/.config/4cord/token`, com permissão `600`.
+  `~/.config/4cord/token`, com permissão `600`; o diretório de configuração usa
+  permissão `700`.
 - O token não é gravado no código, no README nem no log e não é enviado ao
   JavaScript/WebView nem ao `localStorage`.
 - O cache visual do WebView guarda apenas tema, cor, avatares, largura da barra

@@ -13,8 +13,14 @@ venv/
 token
 settings.json
 log.txt
+log.txt.*
+token.*
+settings.json.*
 *.log
 instance.lock
+.token-*
+.settings-*
+.4cord-desktop-*
 
 # Caches e armazenamento local de WebKit/navegador
 .cache/
@@ -28,6 +34,7 @@ Cookies
 Cookies-journal
 *.sqlite
 *.sqlite3
+*.sqlite-*
 
 # Resultados locais de testes e builds
 dist/

@@ -39,7 +39,11 @@ def log(text, critical=False):
     if not (critical or _verbose):
         return
     try:
-        os.makedirs(CONF_DIR, exist_ok=True)
+        os.makedirs(CONF_DIR, mode=0o700, exist_ok=True)
+        try:
+            os.chmod(CONF_DIR, 0o700)
+        except OSError:
+            pass
         line = time.strftime("%Y-%m-%d %H:%M:%S ") + str(text) + "\n"
         line = _TOKEN_RX.sub("[token]", line)
         with _lock:

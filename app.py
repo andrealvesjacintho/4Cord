@@ -49,6 +49,31 @@ _SETTINGS_LOCK = threading.Lock()
 _DESKTOP_LOCK = threading.Lock()
 
 
+def ensure_conf_dir():
+    """Cria a configuracao local com acesso restrito ao dono."""
+    os.makedirs(CONF_DIR, mode=0o700, exist_ok=True)
+    try:
+        os.chmod(CONF_DIR, 0o700)
+    except OSError:
+        pass
+
+
+def _copy_private_file(src, dst):
+    """Copia token/config sem expor o destino com permissoes amplas."""
+    fd, tmp = tempfile.mkstemp(prefix=".migrate-", dir=CONF_DIR)
+    try:
+        with os.fdopen(fd, "wb") as out, open(src, "rb") as inp:
+            shutil.copyfileobj(inp, out)
+        os.chmod(tmp, 0o600)
+        os.replace(tmp, dst)
+    finally:
+        try:
+            if os.path.exists(tmp):
+                os.unlink(tmp)
+        except OSError:
+            pass
+
+
 def migrate_legacy_config():
     """Copia a configuracao antiga uma unica vez, sem alterar o original.
 
@@ -58,7 +83,7 @@ def migrate_legacy_config():
     if os.path.exists(MIGRATION_MARKER):
         return
     try:
-        os.makedirs(CONF_DIR, exist_ok=True)
+        ensure_conf_dir()
         legacy_present = os.path.isdir(LEGACY_CONF_DIR)
         initialized = os.path.exists(SETTINGS_FILE) or os.path.exists(TOKEN_FILE)
         if legacy_present and not initialized:
@@ -66,9 +91,10 @@ def migrate_legacy_config():
                 src = os.path.join(LEGACY_CONF_DIR, name)
                 dst = os.path.join(CONF_DIR, name)
                 if os.path.isfile(src) and not os.path.exists(dst):
-                    shutil.copy2(src, dst)
                     if name in ("token", "settings.json"):
-                        os.chmod(dst, 0o600)
+                        _copy_private_file(src, dst)
+                    else:
+                        shutil.copy2(src, dst)
         # O nome visivel antigo nao deve sobreviver na configuracao migrada.
         try:
             with open(SETTINGS_FILE, encoding="utf-8") as fh:
@@ -125,7 +151,7 @@ def _settings_json(data):
 
 def _write_settings_locked(data):
     payload = _settings_json(data)
-    os.makedirs(CONF_DIR, exist_ok=True)
+    ensure_conf_dir()
     fd, tmp = tempfile.mkstemp(prefix=".settings-", suffix=".tmp", dir=CONF_DIR)
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as fh:
@@ -371,7 +397,7 @@ def js_str(value):
 
 
 def save_token(token):
-    os.makedirs(CONF_DIR, exist_ok=True)
+    ensure_conf_dir()
     # mkstemp cria o arquivo com 0600 desde o inicio; nao ha janela em que o
     # token fique legivel por outros usuarios antes do chmod.
     fd, tmp = tempfile.mkstemp(prefix=".token-", dir=CONF_DIR)
@@ -390,6 +416,12 @@ def save_token(token):
 
 def load_token():
     try:
+        # Corrige instalacoes antigas antes de ler o arquivo.
+        try:
+            if os.stat(TOKEN_FILE).st_mode & 0o077:
+                os.chmod(TOKEN_FILE, 0o600)
+        except OSError:
+            pass
         with open(TOKEN_FILE, encoding="utf-8") as fh:
             return fh.read().strip() or None
     except Exception:
@@ -1175,7 +1207,7 @@ class MainWindow(Gtk.Window):
                 pixbuf = pixbuf.scale_simple(
                     max(1, round(w * scale)), max(1, round(h * scale)),
                     GdkPixbuf.InterpType.BILINEAR)
-            os.makedirs(CONF_DIR, exist_ok=True)
+            ensure_conf_dir()
             pixbuf.savev(ICON_FILE, "png", [], [])
             update_settings(self.settings, icon=ICON_FILE)
             update_desktop_entry(icon=ICON_FILE)
@@ -1361,7 +1393,7 @@ def main():
             critical=True)
     ensure_desktop_entry(settings)
 
-    os.makedirs(CONF_DIR, exist_ok=True)
+    ensure_conf_dir()
     lock = open(os.path.join(CONF_DIR, "instance.lock"), "w")
     try:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)

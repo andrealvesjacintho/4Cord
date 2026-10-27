@@ -10,7 +10,8 @@
       simples.
 - [x] Atalho `~/.local/share/applications/4cord.desktop` com
       `StartupWMClass=4cord` e `Exec` entre aspas (funciona com espaços).
-- [x] Configuração em `~/.config/4cord`; credenciais com permissão `600`.
+- [x] Configuração em `~/.config/4cord`; diretório `700` e credenciais com
+      permissão `600`.
 - [x] Migração da configuração anterior sem apagar os arquivos originais,
       feita uma única vez com marcador; credenciais apagadas no logout não
       voltam.

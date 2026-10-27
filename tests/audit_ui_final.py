@@ -26,7 +26,7 @@ def validate(data):
     content = data['content']
     assert content['title'] == 'Central de informações'
     assert content['version'] == 'v2.4.0'
-    assert content['creator'] == 'Guaxi Rascal'
+    assert content['creator'] == 'André Alves'
     assert content['role'] == 'dialog' and content['modal'] == 'true'
     assert content['labelledby'] == 'infoTitle'
     assert content['helpAria'] == 'Sobre o 4Cord'

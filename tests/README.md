@@ -30,6 +30,8 @@ HOME="$AUDIT_HOME" XDG_CONFIG_HOME="$AUDIT_HOME/.config" \
   python3 tests/audit_dm_reconnect.py
 HOME="$AUDIT_HOME" XDG_CONFIG_HOME="$AUDIT_HOME/.config" \
   python3 tests/audit_ui_final.py
+HOME="$AUDIT_HOME" XDG_CONFIG_HOME="$AUDIT_HOME/.config" \
+  python3 tests/audit_login_close.py
 python3 tests/audit_install.py
 ```
 
@@ -50,6 +52,8 @@ python3 tests/audit_install.py
   deduplicação, limite de 10 DMs, segunda passada e falha isolada.
 - `audit_ui_final.py`: central de informações, abas, ARIA, foco, `Esc`, clique
   no fundo, ícone de envio e recarga manual.
+- `audit_login_close.py`: fechar a janela de login encerra o processo e libera
+  o `instance.lock`, em vez de deixar uma instância invisível em execução.
 - `audit_install.py`: instalação em cópia temporária com HOME isolado,
   idempotência, `--check`, dependências ausentes, caminho Arch, distribuição
   não suportada, `--recreate-venv` e preservação de configuração.

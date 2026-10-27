@@ -577,12 +577,12 @@ class MockAPI:
             return data
 
         base = [
-            msg("m1", "2", "guaxi-", "what happened to all the beans", "43",
+            msg("m1", "2", "andre-", "what happened to all the beans", "43",
                 ["r1"], reactions=[
                     {"emoji": {"name": "🫘", "id": None}, "count": 3, "me": True},
                     {"emoji": {"name": "🔥", "id": None}, "count": 1, "me": False},
                 ]),
-            msg("m2", "2", "guaxi-", "here's a link https://discord.com/accessibility", "43",
+            msg("m2", "2", "andre-", "here's a link https://discord.com/accessibility", "43",
                 ["r1"], components=[{
                     "type": 1,
                     "components": [
@@ -592,7 +592,7 @@ class MockAPI:
                          "url": "https://discord.com/accessibility"},
                     ],
                 }]),
-            msg("m3", "2", "guaxi-", "e **markdown**, `código` e emojis 🎧 continuam aqui", "44",
+            msg("m3", "2", "andre-", "e **markdown**, `código` e emojis 🎧 continuam aqui", "44",
                 ["r1"], reactions=[
                     {"emoji": {"name": "🎧", "id": None}, "count": 2, "me": False},
                 ]),
@@ -685,6 +685,7 @@ class LoginWindow(Gtk.Window):
         super().__init__(title=app_name)
         self.app_name = app_name
         self.app = app
+        self.connect("destroy", self.on_destroy)
         self.set_default_size(470, 610)
         self.set_resizable(False)
         self.set_position(Gtk.WindowPosition.CENTER)
@@ -775,6 +776,7 @@ class LoginWindow(Gtk.Window):
         help_btn.connect("clicked", lambda *_: self.show_help())
         box.pack_end(help_btn, False, False, 0)
 
+        self.enter.set_can_default(True)
         self.set_default(self.enter)
 
     def say(self, text, kind="sub"):
@@ -839,6 +841,13 @@ class LoginWindow(Gtk.Window):
         if force:
             self.say("nenhuma sessão do Discord encontrada nos navegadores.", "err")
         return False
+
+    def on_destroy(self, *_):
+        # Fechar a janela de login sem entrar deve encerrar o processo; caso
+        # contrario ele fica sem janela e segura o instance.lock.
+        if self.app.login is self:
+            self.app.login = None
+            Gtk.main_quit()
 
     def do_login(self):
         token = self.clean_token(self.entry.get_text())
@@ -1261,11 +1270,12 @@ class App:
 
     def open_main(self, token, user, mock=False):
         if self.login:
+            login = self.login
+            self.login = None
             try:
-                self.login.destroy()
+                login.destroy()
             except Exception:
                 pass
-            self.login = None
 
         if mock:
             api = MockAPI()

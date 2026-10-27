@@ -131,6 +131,8 @@
       falha isolada.
 - [x] `audit_ui_final.py`: modal, ARIA, abas, foco preso, `Esc`, fundo, ícone
       de envio, envio e recarga.
+- [x] `audit_login_close.py`: fechar o login encerra o processo e libera o
+      `instance.lock`, permitindo abrir o 4Cord novamente.
 - [x] `audit_install.py`: duas instalações completas, configuração/token
       preservados, `--check`, dependências ausentes, caminho Arch,
       distribuição não suportada, `--recreate-venv` e idempotência.

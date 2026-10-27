@@ -21,6 +21,8 @@
       limitações e referências legadas.
 - [x] Repositório Git local inicializado; nenhuma configuração, token, log ou
       `.venv` versionado.
+- [x] Repositório público publicado em
+      <https://github.com/andrealvesjacintho/4Cord>, branch `main`.
 
 ## Recuperação de mensagens e interface
 
@@ -151,8 +153,8 @@
 
 ## Pendências e limitações
 
-- [ ] Publicar no GitHub. O projeto tem commit local, mas não possui remoto,
-      credenciais ou URL pública; o README não inventa uma URL.
+- [x] Publicar no GitHub em repositório público, branch `main`, com o commit
+      local preservado e remoto `origin` configurado.
 - [ ] Validar instalação real em Arch Linux com Xfce4. O caminho Arch e o tema
       sem GNOME foram testados por simulação/código, não em sessão real.
 - [ ] Validar miniaturas, recuperação de DMs e reconexão com uma conta real do

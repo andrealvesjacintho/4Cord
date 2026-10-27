@@ -16,6 +16,19 @@ log.txt
 *.log
 instance.lock
 
+# Caches e armazenamento local de WebKit/navegador
+.cache/
+cache/
+GPUCache/
+Code Cache/
+Local Storage/
+Session Storage/
+Service Worker/
+Cookies
+Cookies-journal
+*.sqlite
+*.sqlite3
+
 # Resultados locais de testes e builds
 dist/
 build/

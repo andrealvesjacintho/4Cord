@@ -11,11 +11,13 @@ são renderizados pelo próprio 4Cord.
 UI (HTML/CSS/JS)  <->  Python (REST + gateway)  <->  Discord
 ```
 
-> **Estado da publicação:** o projeto ainda não possui repositório público no
-> GitHub. Por isso este README não inventa uma URL de `git clone`; os comandos
-> abaixo partem da pasta do projeto baixada ou recebida. Quando o repositório
-> for publicado, o comando de clonagem exibido pelo GitHub pode ser usado antes
-> do `cd 4Cord` e do instalador.
+- **Criador:** Guaxi Rascal
+- **Repositório público:** <https://github.com/andrealvesjacintho/4Cord>
+- **Branch principal:** `main`
+
+> O projeto está publicado no GitHub. Para obter uma cópia nova, use o
+> `git clone` mostrado na seção de instalação. Quem já possui a pasta local pode
+> continuar usando o repositório existente e executar `git pull`.
 
 ## Novidades da 2.4.0
 
@@ -74,15 +76,20 @@ algum pacote estiver faltando. Ele não faz upgrade completo do sistema.
 
 ## Instalação
 
-A partir da pasta do projeto (por exemplo, `4Cord` ou `4Cord-main`):
+### Clonagem e primeira instalação
 
 ```bash
+git clone https://github.com/andrealvesjacintho/4Cord.git
 cd 4Cord
 ./install.sh --check
 ./install.sh
 ```
 
-O primeiro comando apenas valida a distribuição e as dependências. O segundo:
+Também é possível partir de uma pasta baixada como arquivo ZIP; nesse caso,
+entre nessa pasta antes de executar o instalador.
+
+O `--check` apenas valida a distribuição e as dependências. A instalação
+completa:
 
 1. verifica os pacotes nativos e os imports de GTK/WebKitGTK;
 2. pergunta antes de executar `apt-get` ou `pacman`, caso falte alguma
@@ -286,14 +293,19 @@ aberto. Ao fechar, o foco volta ao botão que abriu a central.
   log também usam permissão restrita.
 - O token não é gravado no código, no README nem no log. Ainda assim, fica em
   texto simples no disco: quem tiver acesso à conta do usuário pode lê-lo.
+- O token não é enviado ao JavaScript nem ao `localStorage` do WebView. O cache
+  visual guarda somente tema, cor de destaque, preferência de avatares, largura
+  da barra e IDs de navegação; a autenticação permanece no processo Python.
 - O log não registra o conteúdo das mensagens; no máximo comando, canal,
   tamanho do texto e erros HTTP/gateway. Formatos de token são redigidos.
-- Não há telemetria própria. O importador opcional procura uma sessão nos
-  armazenamentos locais de navegadores conhecidos e só envia dados à API do
-  Discord.
-- `.gitignore` exclui `.venv`, caches, token, `settings.json`, logs e resultados
-  locais. Antes de publicar, confira `git status` e o histórico para garantir
-  que nenhuma credencial foi versionada.
+- Não há telemetria própria. O importador de sessão, executado localmente ao
+  abrir o login e também disponível pelo botão correspondente, procura uma
+  sessão nos armazenamentos de navegadores conhecidos e valida o token apenas
+  na API oficial do Discord; nada é enviado a terceiros.
+- `.gitignore` exclui `.venv`, caches de WebKit/navegador, token,
+  `settings.json`, logs e resultados locais. Antes de publicar, confira
+  `git status` e o histórico para garantir que nenhuma credencial foi
+  versionada.
 
 ## Estrutura
 
@@ -447,7 +459,8 @@ checklist de aceitação está em [`CHECKLIST.md`](CHECKLIST.md).
 - O instalador não foi testado executando `apt-get`/`pacman` de verdade, porque
   as dependências já estavam instaladas e o ambiente não tinha sudo
   não interativo.
-- O projeto ainda não foi publicado no GitHub e não possui remoto configurado.
+- O repositório está publicado, mas a instalação real em Arch Linux/Xfce4 e o
+  uso com uma conta real do Discord continuam pendentes de validação manual.
 
 ## Compatibilidade com a identidade anterior
 
@@ -483,10 +496,11 @@ existentes; ele não é um nome exibido ao usuário.
 - Relate mudanças de comportamento e limitações de validação no README ou no
   relatório de auditoria.
 
-O projeto está versionado localmente. Para publicar no GitHub, crie um
-repositório vazio e envie a branch `main` usando o comando que o próprio GitHub
-mostra após a criação. Não há URL pública real para inserir neste README nesta
-etapa; quando ela existir, acrescente-a aos comandos de instalação.
+O projeto está versionado e publicado em
+<https://github.com/andrealvesjacintho/4Cord> na branch `main`. Para enviar
+mudanças, faça um commit descritivo e use `git push origin main`; não é
+necessário recriar o repositório nem reescrever o histórico. Relate mudanças de
+comportamento e limitações de validação no README ou no relatório de auditoria.
 
 ## Desinstalação
 
